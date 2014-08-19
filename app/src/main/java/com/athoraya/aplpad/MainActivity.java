@@ -1,25 +1,39 @@
-package uk.co.optimasystems.aplpad;
+package com.athoraya.aplpad;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    public final static String EXTRA_MESSAGE = "uk.co.optimasystems.MESSAGE";
+    public final static String EXTRA_MESSAGE = "com.athoraya.MESSAGE";
+    ClipboardManager mClipboard;
+
+    ClipboardManager.OnPrimaryClipChangedListener mPrimaryChangeListener
+            = new ClipboardManager.OnPrimaryClipChangedListener() {
+        public void onPrimaryClipChanged() {
+            updateClipData();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FontOverride.setDefaultFont(this,"MONOSPACE","fonts/apl385.ttf");
         setContentView(R.layout.activity_main);
-    }
 
+        mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        mClipboard.addPrimaryClipChangedListener(mPrimaryChangeListener);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,10 +60,25 @@ public class MainActivity extends Activity {
     }
 
     public void sendMessage(View view) {
-        Intent intent = new Intent(this,DisplayMessageActivity.class);
         EditText editText = (EditText) findViewById(R.id.edit_message);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
+        ClipData clip = mClipboard.getPrimaryClip().newPlainText("APLPad",editText.getText());
+        mClipboard.setPrimaryClip(clip);
     }
+
+    @Override
+    public void onDestroy(){
+        mClipboard.removePrimaryClipChangedListener(mPrimaryChangeListener);
+    }
+
+    public void updateClipData() {
+        ClipData clip = mClipboard.getPrimaryClip();
+        if (clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)){
+            ClipData.Item item = clip.getItemAt(0);
+
+            TextView clipText = (TextView) findViewById(R.id.clipboard_text);
+            clipText.setText(item.getText());
+
+        }
+    }
+
 }

@@ -1,14 +1,11 @@
-package uk.co.optimasystems.aplpad;
+package com.athoraya.aplpad;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-
-import uk.co.optimasystems.aplpad.R;
 
 public class DisplayMessageActivity extends Activity {
 
